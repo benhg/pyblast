@@ -8,7 +8,7 @@ import errno
 import fcntl
 import os
 import select
-import StringIO
+import io
 import subprocess
 
 
@@ -69,7 +69,7 @@ class Hit(object):
     def __init__(self, fields):
         self.__fields = {}
 
-        for k, v in fields.iteritems():
+        for k, v in fields.items():
             for t in Hit.__TYPES:
                 try:
                     self.__fields[k] = t(v)
@@ -81,7 +81,7 @@ class Hit(object):
         return self.__fields.get(fn, None)
 
     def __dir__(self):
-        return dir(type(self)) + self.__fields.keys()
+        return dir(type(self)) + list(self.__fields.keys())
 
 
 def __read_single_fasta_query_lines(f):
@@ -126,7 +126,7 @@ def __read_single_query_result(rs, field_names):
     the second element is the original imput string.
     '''
 
-    rf = StringIO.StringIO(rs)
+    rf = io.StringIO(rs)
 
     def readline():
         l = rf.readline()
@@ -167,7 +167,7 @@ def __read_single_query_result(rs, field_names):
             field_vals = l.split('\t')
             assert len(field_vals) == len(field_names)
 
-            fields = dict(zip(field_names, field_vals))
+            fields = dict(list(zip(field_names, field_vals)))
             result.hits.append(Hit(fields))
             nhits -= 1
 
@@ -264,7 +264,7 @@ def __run_blast_select_loop(input_file, popens, fields):
             try:
                 written = os.write(fd, qs)
                 qs = qs[written:]
-            except OSError, e:
+            except OSError as e:
                 assert e.errno == errno.EWOULDBLOCK
 
             fd_map[fd]['query_buffer'] = qs
@@ -288,7 +288,7 @@ def __run_blast(blast_command, input_file, *args, **kwargs):
     blast_args += ['-outfmt', '7 {}'.format(' '.join(fields))]
     for a in args:
         blast_args += ['-' + a]
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         if not k.startswith('pb_'):
             blast_args += ['-' + k, str(v)]
 

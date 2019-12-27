@@ -1,6 +1,6 @@
 from distutils.core import setup
 from os.path import dirname, join
-import imp
+import importlib
 
 # Create the long_description from README.rst, minus the first 6 lines which
 # are redundant with the name, version, and short description alreayd displayed
@@ -10,7 +10,7 @@ with open(join(dirname(__file__), 'README.rst')) as f:
 
 fn = join(dirname(__file__), 'pyblast.py')
 with open(fn) as f:
-    pyblast = imp.load_source('pyblast', fn, f)
+    pyblast = importlib.import_module('pyblast', fn)
     version = pyblast.VERSION
 
 setup(
